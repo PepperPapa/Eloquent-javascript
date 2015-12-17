@@ -13,8 +13,12 @@ by a historical accident, typeof null also produces "object".
 */
 
 function deepEqual(a, b) {
+  //类型和值都相等可以确定a==b
   if (a === b) return true;
 
+  //1.任何一个为null就表示不相等，即使a b都为null，因为null没有任何意义
+  //2.如果a或b任何一个类型不是object，如果相等在上面的a===b判断中就应该返回会true，
+  //不返回就说明不相等，可以直接返回false
   if (a == null || typeof a != "object" ||
       b == null || typeof b != "object")
     return false;
