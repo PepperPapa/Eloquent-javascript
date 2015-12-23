@@ -1,9 +1,22 @@
+var plan = ["############################",
+            "#      #    #      o      ##",
+            "#                          #",
+            "#          #####           #",
+            "##         #   #    ##     #",
+            "###           ##     #     #",
+            "#           ###      #     #",
+            "#   ####                   #",
+            "#   ##       o             #",
+            "# o  #         o       ### #",
+            "#    #                     #",
+            "############################"];
+
 function Vector(x, y) {
   this.x = x;
   this.y = y;
 }
 Vector.prototype.plus = function(other) {
-  return new Vector(this.x + other.x, this.y + this.y);
+  return new Vector(this.x + other.x, this.y + other.y);
 };
 
 function Grid(width, height) {
@@ -12,23 +25,25 @@ function Grid(width, height) {
   this.height = height;
 }
 Grid.prototype.isInside = function(vector) {
-  return vector.x >= 0 && vector.x < vector.width &&
-       	 vector.y >= 0 && vector.y < vector.height;
+  return vector.x >= 0 && vector.x < this.width &&
+       	 vector.y >= 0 && vector.y < this.height;
 };
 Grid.prototype.get = function(vector) {
-  return this.space[vector.x + vector.y * this.width];
+  return this.space[vector.x + this.width * vector.y];
 };
 Grid.prototype.set = function(vector, value) {
-  return this.space[vector.x + vector.y * this.width] = value;
+  this.space[vector.x + this.width * vector.y] = value;
 };
-Grid.prototype.forEach = function(f, context) {
-  for (var y = 0; y < this.height; y++) {
-    for (var x = 0; x < this.width; x++) {
-      var value = this.space[x + y * this.width];
-      if (value != null)
-        f.call(context, value, new Vector(x, y));
-    }
-  }
+
+var directions = {
+  "n":  new Vector( 0, -1),
+  "ne": new Vector( 1, -1),
+  "e":  new Vector( 1,  0),
+  "se": new Vector( 1,  1),
+  "s":  new Vector( 0,  1),
+  "sw": new Vector(-1,  1),
+  "w":  new Vector(-1,  0),
+  "nw": new Vector(-1, -1)
 };
 
 function randomElement(array) {
@@ -39,13 +54,13 @@ var directionNames = "n ne e se s sw w nw".split(" ");
 
 function BouncingCritter() {
   this.direction = randomElement(directionNames);
-}
+};
 
 BouncingCritter.prototype.act = function(view) {
   if (view.look(this.direction) != " ")
     this.direction = view.find(" ") || "s";
   return {type: "move", direction: this.direction};
-}
+};
 
 function elementFromChar(legend, ch) {
   if (ch == " ")
@@ -76,7 +91,7 @@ function charFromElement(element) {
 
 World.prototype.toString = function() {
   var output = "";
-  for (var y = 0; y <  this.grid.height; y++) {
+  for (var y = 0; y < this.grid.height; y++) {
     for (var x = 0; x < this.grid.width; x++) {
       var element = this.grid.get(new Vector(x, y));
       output += charFromElement(element);
@@ -85,6 +100,33 @@ World.prototype.toString = function() {
   }
   return output;
 };
+
+function Wall() {}
+
+var world = new World(plan, {"#": Wall,
+                             "o": BouncingCritter});
+//   #      #    #      o      ##
+//   #                          #
+//   #          #####           #
+//   ##         #   #    ##     #
+//   ###           ##     #     #
+//   #           ###      #     #
+//   #   ####                   #
+//   #   ##       o             #
+//   # o  #         o       ### #
+//   #    #                     #
+//   ############################
+
+Grid.prototype.forEach = function(f, context) {
+  for (var y = 0; y < this.height; y++) {
+    for (var x = 0; x < this.width; x++) {
+      var value = this.space[x + y * this.width];
+      if (value != null)
+        f.call(context, value, new Vector(x, y));
+    }
+  }
+};
+
 World.prototype.turn = function() {
   var acted = [];
   this.grid.forEach(function(critter, vector) {
@@ -94,6 +136,7 @@ World.prototype.turn = function() {
     }
   }, this);
 };
+
 World.prototype.letAct = function(critter, vector) {
   var action = critter.act(new View(this, vector));
   if (action && action.type == "move") {
@@ -104,7 +147,8 @@ World.prototype.letAct = function(critter, vector) {
     }
   }
 };
-World.prototype.checkDestion = function(action, vector) {
+
+World.prototype.checkDestination = function(action, vector) {
   if (directions.hasOwnProperty(action.direction)) {
     var dest = vector.plus(directions[action.direction]);
     if (this.grid.isInside(dest))
@@ -161,6 +205,8 @@ function LifelikeWorld(map, legend) {
 }
 LifelikeWorld.prototype = Object.create(World.prototype);
 
+var actionTypes = Object.create(null);
+
 LifelikeWorld.prototype.letAct = function(critter, vector) {
   var action = critter.act(new View(this, vector));
   var handled = action && action.type in actionTypes &&
@@ -173,7 +219,6 @@ LifelikeWorld.prototype.letAct = function(critter, vector) {
   }
 };
 
-var actionTypes = Object.create(null);
 actionTypes.grow = function(critter) {
   critter.energy += 0.5;
   return true;
@@ -237,8 +282,6 @@ PlantEater.prototype.act = function(view) {
     return {type: "move", direction: space};
 };
 
-function Wall() {}
-
 var valley = new LifelikeWorld(
   ["############################",
    "#####                 ######",
@@ -256,4 +299,3 @@ var valley = new LifelikeWorld(
               "O": PlantEater,
               "*": Plant}
                               );
-console.log(valley);
