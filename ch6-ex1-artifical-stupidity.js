@@ -283,6 +283,21 @@ PlantEater.prototype.act = function(view) {
     return {type: "move", direction: space};
 };
 
+function SmartPlantEater() {
+  this.energy = 20;
+}
+SmartPlantEater.prototype.act = function(view) {
+  var space = view.find(" ");
+  if (this.energy > 60 && space)
+    return {type: "reproduce", direction: space};
+  var plant = view.find("*");
+  //周围只有大于1棵Plant时才吃
+  if (view.findAll("*").length > 1)
+    return {type: "eat", direction: plant};
+  if (space)
+    return {type: "move", direction: space};
+};
+
 var valley = new LifelikeWorld(
   ["############################",
    "#####                 ######",
@@ -297,7 +312,7 @@ var valley = new LifelikeWorld(
    "##****    ###***        *###",
    "############################"],
              {"#": Wall,
-              "O": PlantEater,
+              "O": SmartPlantEater,
               "*": Plant}
                               );
 
@@ -378,4 +393,24 @@ var valley = new LifelikeWorld(
 3.各个对象之间是什么关系？
 
 
+*/
+
+
+// the author's solution
+/*
+function SmartPlantEater() {
+  this.energy = 30;
+  this.direction = "e";
+}
+SmartPlantEater.prototype.act = function(view) {
+  var space = view.find(" ");
+  if (this.energy > 90 && space)
+    return {type: "reproduce", direction: space};
+  var plants = view.findAll("*");
+  if (plants.length > 1)
+    return {type: "eat", direction: randomElement(plants)};
+  if (view.look(this.direction) != " " && space)
+    this.direction = space;
+  return {type: "move", direction: this.direction};
+};
 */
