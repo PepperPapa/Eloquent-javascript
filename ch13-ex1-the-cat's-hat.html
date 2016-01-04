@@ -1,0 +1,75 @@
+<!--
+The cat’s hat
+Extend the cat animation defined earlier so that both the cat and his
+hat (<img src="img/hat.png">) orbit at opposite sides of the ellipse.
+Or make the hat circle around the cat. Or alter the animation in some
+other interesting way.
+To make positioning multiple objects easier, it is probably a good idea
+to switch to absolute positioning. This means that top and left are
+counted relative to the top left of the document. To avoid using negative
+coordinates, you can simply add a fixed number of pixels to the position
+values.
+-->
+
+<!doctype html>
+<script src="code/mountains.js"></script>
+<script src="code/chapter/13_dom.js"></script>
+
+<img src="img/cat.png" id="cat" style="position: absolute">
+<img src="img/hat.png" id="hat" style="position: absolute">
+
+<script>
+  var cat = document.querySelector("#cat");
+  var hat = document.querySelector("#hat");
+  var angle = 0, hat_angle = 0, lastTime = null;
+  function animate(time) {
+    if (lastTime != null) {
+      angle += (time - lastTime) * 0.001;
+      hat_angle += (time - lastTime) * 0.005;
+    }
+    lastTime = time;
+    var cat_x = (Math.sin(angle) * 80) + 200;
+    var cat_y = (Math.cos(angle) * 200) + 300;
+    cat.style.top = cat_x + "px";
+    cat.style.left = cat_y + "px";
+    hat.style.top = cat_x + (Math.sin(hat_angle) * 60) + "px";
+    hat.style.left = cat_y + (Math.cos(hat_angle) * 60) + "px";
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+</script>
+
+<!-- the author's solution:
+<!doctype html>
+<script src="code/mountains.js"></script>
+<script src="code/chapter/13_dom.js"></script>
+
+<body style="min-height: 200px">
+
+<img src="img/cat.png" id="cat" style="position: absolute">
+<img src="img/hat.png" id="hat" style="position: absolute">
+
+<script>
+  var cat = document.querySelector("#cat");
+  var hat = document.querySelector("#hat");
+
+  var angle = 0, lastTime = null;
+  function animate(time) {
+    if (lastTime != null)
+      angle += (time - lastTime) * 0.0015;
+    lastTime = time;
+
+    cat.style.top = (Math.sin(angle) * 50 + 80) + "px";
+    cat.style.left = (Math.cos(angle) * 200 + 230) + "px";
+    // By adding π to the angle, the hat ends up half a circle ahead of the cat
+    var hatAngle = angle + Math.PI;
+    hat.style.top = (Math.sin(hatAngle) * 50 + 80) + "px";
+    hat.style.left = (Math.cos(hatAngle) * 200 + 230) + "px";
+
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+</script>
+
+</body>
+ -->

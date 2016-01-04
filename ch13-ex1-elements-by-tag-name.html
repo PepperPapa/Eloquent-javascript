@@ -1,0 +1,95 @@
+<!--
+Elements by tag name
+The getElementsByTagName method returns all child elements with a given
+tag name. Implement your own version of it as a regular nonmethod
+function that takes a node and a string (the tag name) as arguments
+and returns an array containing all descendant element nodes with the
+given tag name.
+To find the tag name of an element, use its tagName property. But note
+that this will return the tag name in all uppercase. Use the toLowerCase
+or toUpperCase string method to compensate for this.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>elements by tag name</title>
+    <script src="code/mountains.js"></script>
+    <script src="code/chapter/13_dom.js"></script>
+  </head>
+  <body>
+    <h1>Heading with a <span>span</span> element.</h1>
+    <p>A paragraph with <span>one</span>, <span>two</span>
+      spans.</p>
+
+    <script>
+      var matchs = [];
+      function byTagName(node, tagName) {
+        if (node.children.length == 1) {
+          if (node.children[0].tagName = tagName.toUpperCase()) {
+            matchs.push(node.children[0]);
+          }
+        } else {
+          var new_node = node.children;
+          // console.log("new node is ", new_node);
+          if (node.tagName == tagName.toUpperCase()) {
+            matchs.push(node)
+          }
+          for (var i = 0; i < new_node.length; i++) {
+            byTagName(new_node[i], tagName);
+          }
+        }
+        return matchs;
+      }
+      console.log(byTagName(document.body, "h1").length);
+      // → 1
+      matchs = [];
+      console.log(byTagName(document.body, "span").length);
+      // console.log(byTagName(document.body, "span"));
+      // → 3
+      matchs = [];
+      var para = document.querySelector("p");
+      console.log(byTagName(para, "span").length);
+      // → 2
+    </script>
+  </body>
+</html>
+
+<!-- the author's solution:
+<!doctype html>
+<script src="code/mountains.js"></script>
+<script src="code/chapter/13_dom.js"></script>
+
+<h1>Heading with a <span>span</span> element.</h1>
+<p>A paragraph with <span>one</span>, <span>two</span>
+  spans.</p>
+
+<script>
+  function byTagName(node, tagName) {
+    var found = [];
+    tagName = tagName.toUpperCase();
+
+    function explore(node) {
+      for (var i = 0; i < node.childNodes.length; i++) {
+        var child = node.childNodes[i];
+        if (child.nodeType == document.ELEMENT_NODE) {
+          if (child.nodeName == tagName)
+            found.push(child);
+          explore(child);
+        }
+      }
+    }
+
+    explore(node);
+    return found;
+  }
+
+  console.log(byTagName(document.body, "h1").length);
+  // → 1
+  console.log(byTagName(document.body, "span").length);
+  // → 3
+  var para = document.querySelector("p");
+  console.log(byTagName(para, "span").length);
+  // → 2
+</script>
+-->
