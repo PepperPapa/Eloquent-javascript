@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      .trail { /* className for the trail elements */
+        position: absolute;
+        height: 6px; width: 6px;
+        border-radius: 3px;
+        background: teal;
+      }
+      body {
+        height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <div class="trail"></div>
+    <script>
+      var trails = document.querySelectorAll(".trail");
+      var currentDot = 0;
+      console.log(trails);
+      addEventListener("mousemove", function (event) {
+        trails[currentDot].style.top = event.pageY + "px";
+        trails[currentDot].style.left = event.pageX + "px";
+        currentDot = (currentDot + 1) % trails.length;
+        console.log(currentDot);
+      });
+    </script>
+  </body>
+</html>
+
+<!-- the author's solution:
+<!doctype html>
+
+<style>
+  .trail { /* className for the trail elements */
+    position: absolute;
+    height: 6px; width: 6px;
+    border-radius: 3px;
+    background: teal;
+  }
+  body {
+    height: 300px;
+  }
+</style>
+
+<body>
+<script>
+  var dots = [];
+  for (var i = 0; i < 12; i++) {
+    var node = document.createElement("div");
+    node.className = "trail";
+    document.body.appendChild(node);
+    dots.push(node);
+  }
+  var currentDot = 0;
+
+  addEventListener("mousemove", function(event) {
+    var dot = dots[currentDot];
+    dot.style.left = (event.pageX - 3) + "px";
+    dot.style.top = (event.pageY - 3) + "px";
+    currentDot = (currentDot + 1) % dots.length;
+  });
+</script>
+</body>
+ -->
