@@ -1,4 +1,19 @@
 /*
+Closure
+The way we have defined fun allows functions in Egg to “close over”
+the surrounding environment, allowing the function’s body to use local
+values that were visible at the time the function was defined, just like
+JavaScript functions do.
+The following program illustrates this: function f returns a function
+that adds its argument to f’s argument, meaning that it needs access to
+the local scope inside f to be able to use variable a.
+run (" do ( d e f i n e (f , fun (a , fun (b , +( a , b ) ) ) ) ," ,
+" print ( f (4) (5) ) ) ") ;
+// ! 9
+Go back to the definition of the fun form and explain which mechanism
+causes this to work.
+*/
+/*
 A programming language: Egg
 */
 
@@ -51,12 +66,6 @@ function parse(program) {
   }
   return result.expr;
 }
-
-console.log(parse("+(a, 10)"));
-// -> { type : " apply " ,
-//      operator : { type : " word " , name : "+"} ,
-//      args : [{ type : " word " , name : " a "} ,
-//              { type : " value " , value : 10}]}
 
 function evaluate(expr, env) {
   switch (expr.type) {
@@ -158,10 +167,6 @@ var topEnv = Object.create(null);
 topEnv["true"] = true;
 topEnv["false"] = false;
 
-var prog = parse("if (true, false, true)");
-console.log(evaluate(prog, topEnv));
-// -> false
-
 ["+", "-", "*", "/", "==", "<", ">"].forEach(function(op) {
   topEnv[op] = new Function("a, b", "return a " + op + " b;");
 });
@@ -177,21 +182,37 @@ function run() {
   return evaluate(parse(program), env);
 }
 
-run("do(define(total, 0),",
-    "   define(count, 1),",
-    "   while(<(count, 11),",
-    "     do(define(total, +(total, count)),",
-    "        define(count, +(count, 1)))),",
-    "   print(total))");
-// -> 55
+run("do(define(f, fun(a, fun(b, +(a, b)))),",
+    "   print(f(4)(5)))");
+// -> 9
 
-run("do(define(plusOne, fun(a, +(a, 1))),",
-    "   print(plusOne(10)))");
-// -> 11
+// debugging info
+// toDo: 还没有弄明白该问题的答案
+argNames>> ["a"]
+body>> {
+type:	"apply"
+operator:	{type: "word", name: "fun"}
+args:	[
+  {type: "word", name: "b"},
+  {
+    type:	"apply"
+    operator:	{type: "word", name: "+"}
+    args:	[
+      {type: "word", name: "a"},
+      {type: "word", name:	"b"}
+    ]
+  }
+  ]
+}
+localEnv>> {a: 4}
 
-run("do(define(pow, fun(base, exp,",
-    "     if(==(exp, 0),",
-    "        1,",
-    "        *(base, pow(base, -(exp, 1)))))),",
-    "   print(pow(2, 10)))");
-// -> 1024
+argNames>> ["b"]
+body>> {
+type:	"apply"
+operator:	{type: "word", name: "+"}
+args:	[
+  {type: "word", name: "a"},
+  {type:	"word",name:	"b"}
+  ]
+}
+localEnv>> {b: 5}
