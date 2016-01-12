@@ -187,7 +187,24 @@ run("do(define(f, fun(a, fun(b, +(a, b)))),",
 // -> 9
 
 // debugging info
-// toDo: 还没有弄明白该问题的答案
+/* toDo:
+看下句代码，localEnv会继承原型链env的属性，因为该例中变量a实际上存在于原型链中，
+因此在+(a, b)操作中可以查到变量a的值。
+var localEnv = Object.create(env);
+TODO：那为什么函数执行完毕后，局部变量会被释放？
+应该是因为下面的return值实际就是一个函数，localEnv会在函数执行完毕后释放，这是原生
+javascript的特性
+return function() {
+  if (arguments.length != argNames.length) {
+    throw new TypeError("Wrong number of arguments");
+  }
+  var localEnv = Object.create(env);
+  for (var i = 0; i < arguments.length; i++) {
+    localEnv[argNames[i]] = arguments[i];
+  }
+  return evaluate(body, localEnv);
+};
+*/
 argNames>> ["a"]
 body>> {
 type:	"apply"
