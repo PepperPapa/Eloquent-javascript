@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <canvas width="600" height="300"></canvas>
+    <script>
+      var results = [
+        {name: "Satisfied", count: 1043, color: "lightblue"} ,
+        {name: "Neutral", count: 563, color: "lightgreen"} ,
+        {name: "Unsatisfied", count: 510, color: "pink"} ,
+        {name: "Nocomment ", count: 200, color: "silver"}
+      ];
+      var cx = document.querySelector("canvas").getContext("2d");
+      var total = results.reduce(function(sum, choice) {
+        return sum + choice.count;
+      }, 0);
+
+      var currentAngle = -0.5 * Math.PI;
+      var centerX = 300, centerY = 150;
+      cx.translate(centerX, centerY);
+      // Add code to draw the slice labels in this loop.
+      results.forEach(function(result) {
+        var sliceAngle = (result.count / total) * 2 * Math.PI;
+        cx.beginPath();
+        cx.arc(0, 0, 100,
+               currentAngle, currentAngle + sliceAngle);
+        var txt_angle = currentAngle;
+        currentAngle += sliceAngle;
+        txt_angle = (txt_angle + currentAngle) / 2;
+
+        cx.lineTo(0, 0);
+        cx.fillStyle = result.color;
+        cx.fill();
+
+        cx.font = "16px Georgia";
+        cx.fillStyle = "blue";
+        cx.textAlign = "center";
+        cx.textBaseline = "middle";
+        cx.fillText(result.name, 110 * Math.cos(txt_angle),
+                                110 * Math.sin(txt_angle));
+      });
+    </script>
+  </body>
+</html>
+
+<!-- the author's solution:
+<!doctype html>
+<script src="code/chapter/15_game.js"></script>
+<script src="code/game_levels.js"></script>
+<script src="code/chapter/16_canvas.js"></script>
+
+<canvas width="600" height="300"></canvas>
+<script>
+  var cx = document.querySelector("canvas").getContext("2d");
+  var total = results.reduce(function(sum, choice) {
+    return sum + choice.count;
+  }, 0);
+
+  var currentAngle = -0.5 * Math.PI;
+  var centerX = 300, centerY = 150;
+
+  results.forEach(function(result) {
+    var sliceAngle = (result.count / total) * 2 * Math.PI;
+    cx.beginPath();
+    cx.arc(centerX, centerY, 100,
+           currentAngle, currentAngle + sliceAngle);
+
+    var middleAngle = currentAngle + 0.5 * sliceAngle;
+    var textX = Math.cos(middleAngle) * 120 + centerX;
+    var textY = Math.sin(middleAngle) * 120 + centerY;
+    cx.textBaseLine = "middle";
+    if (Math.cos(middleAngle) > 0)
+      cx.textAlign = "left";
+    else
+      cx.textAlign = "right";
+    cx.font = "15px sans-serif";
+    cx.fillStyle = "black";
+    cx.fillText(result.name, textX, textY);
+
+    currentAngle += sliceAngle;
+    cx.lineTo(centerX, centerY);
+    cx.fillStyle = result.color;
+    cx.fill();
+  });
+</script> -->

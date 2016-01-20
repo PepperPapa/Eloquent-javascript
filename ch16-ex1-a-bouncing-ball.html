@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <canvas width="400" height="400"></canvas>
+    <script>
+      var cx = document.querySelector("canvas").getContext("2d");
+
+      // drawing the wall
+      var centerX = 150, centerY = 150;
+      var direction = 2 * Math.PI * Math.random();
+
+      var lastTime = null;
+      function frame(time) {
+        if (lastTime != null)
+          updateAnimation(Math.min(100, time - lastTime) / 1000);
+        lastTime = time;
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+
+      function updateAnimation(step) {
+        cx.clearRect(0, 0, 350, 350);
+        cx.strokeStyle = "gray";
+        cx.lineWidth = 10;
+        cx.strokeRect(5, 5, 300, 300);
+
+        // drawing the ball
+        cx.strokeStyle = "blue";
+        cx.lineWidth = 1;
+        cx.fillStyle = "blue";
+        cx.beginPath();
+        cx.arc(centerX, centerY, 10, 0, 7);
+        cx.fill();
+
+        // check the collision
+        centerX += 120 * step * Math.cos(direction);
+        centerY += 120 * step * Math.sin(direction);
+        if ((centerX > 290) || (centerX < 20)) {
+          direction = Math.PI - direction;
+        }
+
+        if ((centerY > 290) || (centerY < 20)) {
+          direction = -direction;
+        }
+
+      }
+    </script>
+  </body>
+</html>
+
+<!-- the author's solution:
+<!doctype html>
+<script src="code/chapter/15_game.js"></script>
+<script src="code/game_levels.js"></script>
+<script src="code/chapter/16_canvas.js"></script>
+
+<canvas width="400" height="400"></canvas>
+<script>
+  var cx = document.querySelector("canvas").getContext("2d");
+
+  var lastTime = null;
+  function frame(time) {
+    if (lastTime != null)
+      updateAnimation(Math.min(100, time - lastTime) / 1000);
+    lastTime = time;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  var x = 100, y = 300;
+  var radius = 10;
+  var speedX = 100, speedY = 60;
+
+  function updateAnimation(step) {
+    cx.clearRect(0, 0, 400, 400);
+    cx.strokeStyle = "blue";
+    cx.lineWidth = 4;
+    cx.strokeRect(25, 25, 350, 350);
+
+    x += step * speedX;
+    y += step * speedY;
+    if (x < 25 + radius || x > 375 - radius)
+      speedX = -speedX;
+    if (y < 25 + radius || y > 375 - radius)
+      speedY = -speedY;
+    cx.fillStyle = "red";
+    cx.beginPath();
+    cx.arc(x, y, radius, 0, 7);
+    cx.fill();
+  }
+</script> -->

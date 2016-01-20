@@ -1,0 +1,160 @@
+<!doctype html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <canvas width="600" height="200"></canvas>
+    <script>
+      var cx = document.querySelector("canvas").getContext("2d");
+
+      //A trapezoid (a rectangle that is wider on one side)
+      function trapezoid(cx, start_x, start_y, up_width, down_width, height) {
+        cx.save();
+        cx.beginPath();
+        cx.moveTo(start_x, start_y);
+        cx.lineTo(start_x + up_width, start_y);
+        cx.lineTo(start_x + up_width + (down_width - up_width) / 2, start_y + height);
+        cx.lineTo(start_x - (down_width - up_width) / 2, start_y + height);
+        cx.closePath();
+        cx.stroke();
+        cx.restore();
+      }
+      trapezoid(cx, 10, 10, 50, 70, 60);
+
+      //A red diamond (a rectangle rotated 45 degrees)
+      function diamond(cx, center, width, color) {
+        cx.save();
+        cx.fillStyle = color;
+        cx.translate(center[0], center[1]);
+        cx.rotate(0.25 * Math.PI);
+        cx.fillRect(0, 0, width, width);
+        cx.restore();
+      }
+      diamond(cx, [130, 0], 60, "red");
+
+      //A zigzagging line
+      function zigzagging(cx, start, width, len, times) {
+        cx.beginPath();
+        var x = start[0];
+        var y = start[1];
+        cx.moveTo(x, y);
+        for (var i = 0; i < times; i++) {
+          cx.lineTo(x + width, y + (1 + 2 * i) * len);
+          cx.lineTo(x, y + (1 + i) * 2 * len);
+        }
+        cx.stroke();
+      }
+      zigzagging(cx, [190, 5], 70, 6, 6);
+
+      //A spiral made up of 100 straight line segments
+      function spiral(cx, center, radius, times) {
+        cx.beginPath();
+        var angle = 0;
+        for (var i = 0; i < times; i++) {
+          cx.arc(center[0], center[1], (1 + 0.13 * i) * radius, angle,
+                angle + 1 / 25 * Math.PI);
+          angle = angle + 1 / 25 * Math.PI;
+        }
+        cx.stroke();
+      }
+      spiral(cx, [340, 60], 2, 200);
+
+      //a yellow star
+      function star(cx, center, radius, times, color) {
+        cx.save();
+        cx.translate(center[0], center[1]);
+        cx.fillStyle = color;
+        cx.strokeStyle = color;
+        cx.beginPath();
+        var x = radius;
+        var y = 0;
+        cx.moveTo(x, y);
+        for (var k = 0; k < times; k++) {
+          var angle = (k + 1) / times * 2 * Math.PI;
+          x = radius * Math.cos(angle);
+          y = radius * Math.sin(angle);
+          cx.quadraticCurveTo(0, 0, x, y);
+        }
+        cx.fill();
+        cx.stroke();
+        cx.restore();
+      }
+      star(cx, [460, 60], 40, 8, "#ffbb00");
+    </script>
+  </body>
+</html>
+
+<!-- the author's solution:
+<!doctype html>
+<script src="code/chapter/15_game.js"></script>
+<script src="code/game_levels.js"></script>
+<script src="code/chapter/16_canvas.js"></script>
+
+<canvas width="600" height="200"></canvas>
+<script>
+  var cx = document.querySelector("canvas").getContext("2d");
+
+  function parallelogram(x, y) {
+    cx.beginPath();
+    cx.moveTo(x, y);
+    cx.lineTo(x + 50, y);
+    cx.lineTo(x + 70, y + 50);
+    cx.lineTo(x - 20, y + 50);
+    cx.closePath();
+    cx.stroke();
+  }
+  parallelogram(30, 30);
+
+  function diamond(x, y) {
+    cx.translate(x + 30, y + 30);
+    cx.rotate(Math.PI / 4);
+    cx.fillStyle = "red";
+    cx.fillRect(-30, -30, 60, 60);
+    cx.resetTransform();
+  }
+  diamond(140, 30);
+
+  function zigzag(x, y) {
+    cx.beginPath();
+    cx.moveTo(x, y);
+    for (var i = 0; i < 8; i++) {
+      cx.lineTo(x + 80, y + i * 8 + 4);
+      cx.lineTo(x, y + i * 8 + 8);
+    }
+    cx.stroke();
+  }
+  zigzag(240, 20);
+
+  function spiral(x, y) {
+    var radius = 50, xCenter = x + radius, yCenter = y + radius;
+    cx.beginPath();
+    cx.moveTo(xCenter, yCenter);
+    for (var i = 0; i < 300; i++) {
+      var angle = i * Math.PI / 30;
+      var dist = radius * i / 300;
+      cx.lineTo(xCenter + Math.cos(angle) * dist,
+                yCenter + Math.sin(angle) * dist);
+    }
+    cx.stroke();
+  }
+  spiral(340, 20);
+
+  function star(x, y) {
+    var radius = 50, xCenter = x + radius, yCenter = y + radius;
+    cx.beginPath();
+    cx.moveTo(xCenter + radius, yCenter);
+    for (var i = 1; i <= 8; i++) {
+      var angle = i * Math.PI / 4;
+      cx.quadraticCurveTo(xCenter, yCenter,
+                          xCenter + Math.cos(angle) * radius,
+                          yCenter + Math.sin(angle) * radius);
+    }
+    cx.fillStyle = "gold";
+    cx.fill();
+  }
+  star(440, 20);
+</script>
+-->
