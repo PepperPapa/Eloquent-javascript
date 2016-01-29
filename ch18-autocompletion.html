@@ -1,0 +1,26 @@
+<!doctype html>
+<input type="text" id="field">
+<div id="suggestions" style="cursor: pointer"></div>
+
+<script>
+  // Builds up an array with global variable names, like
+  // 'alert', 'document', and 'scrollTo'
+  var terms = [];
+  for (var name in window)
+    terms.push(name);
+
+  var input_text = document.querySelector("#field");
+  var suggest_items = document.querySelector("#suggestions");
+  input_text.addEventListener("input", function () {
+    var intxt = this.value;
+    var match_items = [];
+    terms.forEach(function(term) {
+      if (term.startsWith(intxt)) {
+        match_items.push(term);
+      }
+    });
+    suggest_items.innerHTML = match_items.join('<br>');
+  });
+
+
+</script>

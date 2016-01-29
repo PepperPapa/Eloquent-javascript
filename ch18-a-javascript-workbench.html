@@ -1,0 +1,20 @@
+<!doctype html>
+<!-- <script src="code/promise.js"></script> -->
+
+<textarea id="code">return "hi";</textarea>
+<button id="button">Run</button>
+<pre id="output"></pre>
+
+<script>
+  var run = document.getElementById("button");
+  run.addEventListener("click", function() {
+    var code = document.getElementById("code");
+    var result = document.getElementById("output");
+    try {
+      var exec = new Function(code.value)();
+      result.innerText = String(exec);
+    } catch (e) {
+      result.innerText = "Error: " + e;
+    }
+  });
+</script>
