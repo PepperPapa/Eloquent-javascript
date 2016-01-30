@@ -1,4 +1,68 @@
+<!-- Autocompletion
+Extend a text field so that when the user types, a list of suggested values
+is shown below the field. You have an array of possible values available
+and should show those that start with the text that was typed. When a
+suggestion is clicked, replace the text field’s current value with it. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    ul {
+      margin: 0 0 0 0;
+      padding: 0 0 0 0;
+      height: 200px;
+      width: 180px;
+      overflow: auto;
+    }
+    li {
+      list-style: none;
+    }
+    li:hover {
+      background-color: lightgray;
+    }
+  </style>
+</head>
+<body>
+  <input type="text" id="field">
+  <div id="suggestions" style="cursor: pointer"></div>
+
+  <script>
+    // Builds up an array with global variable names, like
+    // 'alert', 'document', and 'scrollTo'
+    var terms = [];
+    for (var name in window)
+      terms.push(name);
+
+    var input_text = document.querySelector("#field");
+    var suggest_items = document.querySelector("#suggestions");
+    input_text.addEventListener("input", function () {
+      var intxt = this.value;
+      var match_items = [];
+      terms.forEach(function(term) {
+        if (term.startsWith(intxt)) {
+          match_items.push("<li>" + term + "</li>");
+        }
+      });
+      suggest_items.innerHTML = "<ul>" + match_items.join('') +"</ul>";
+      var allli = document.querySelectorAll("li");
+      for (var i = 0; i < allli.length; i++) {
+        allli[i].addEventListener("click", function () {
+          input_text.value = this.innerText;
+          suggest_items.innerHTML = "";
+        })
+      }
+    });
+  </script>
+</body>
+</html>
+
+<!--
+the author's solution:
 <!doctype html>
+<script src="code/promise.js"></script>
+
 <input type="text" id="field">
 <div id="suggestions" style="cursor: pointer"></div>
 
@@ -9,18 +73,22 @@
   for (var name in window)
     terms.push(name);
 
-  var input_text = document.querySelector("#field");
-  var suggest_items = document.querySelector("#suggestions");
-  input_text.addEventListener("input", function () {
-    var intxt = this.value;
-    var match_items = [];
-    terms.forEach(function(term) {
-      if (term.startsWith(intxt)) {
-        match_items.push(term);
-      }
+  var textfield = document.querySelector("#field");
+  var suggestions = document.querySelector("#suggestions");
+
+  textfield.addEventListener("input", function() {
+    var matching = terms.filter(function(term) {
+      return term.indexOf(textfield.value) == 0;
     });
-    suggest_items.innerHTML = match_items.join('<br>');
+    suggestions.textContent = "";
+    matching.slice(0, 20).forEach(function(term) {
+      var node = document.createElement("div");
+      node.textContent = term;
+      node.addEventListener("click", function() {
+        textfield.value = term;
+        suggestions.textContent = "";
+      });
+      suggestions.appendChild(node);
+    });
   });
-
-
-</script>
+</script> -->

@@ -1,0 +1,291 @@
+<!-- Conway’s Game of Life
+Conway’s Game of Life is a simple simulation that creates artificial “life”
+on a grid, each cell of which is either live or not. Each generation (turn),
+the following rules are applied:
+• Any live cell with fewer than two or more than three live neighbors
+dies.
+• Any live cell with two or three live neighbors lives on to the next
+generation.
+• Any dead cell with exactly three live neighbors becomes a live cell.
+A neighbor is defined as any adjacent cell, including diagonally adjacent
+ones.
+Note that these rules are applied to the whole grid at once, not one
+square at a time. That means the counting of neighbors is based on
+the situation at the start of the generation, and changes happening to
+neighbor cells during this generation should not influence the new state
+of a given cell.
+Implement this game using whichever data structure you find appropriate.
+Use Math.random to populate the grid with a random pattern initially.
+Display it as a grid of checkbox fields, with a button next to it to advance
+to the next generation. When the user checks or unchecks the
+checkboxes, their changes should be included when computing the next
+generation. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    td {
+      padding: 0 0;
+    }
+    input {
+      margin: 0 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="grid"></div>
+  <button id="next">Next generation</button>
+  <button id="auto">Auto run</button>
+
+  <script>
+    function generateGrid (width, height) {
+      var table = document.createElement("table");
+      for (var i = 0; i < height; i++) {
+        var table_tr = document.createElement("tr");
+        for (var j = 0; j < width; j++) {
+          var table_td = document.createElement("td");
+          table_td.innerHTML = "<input type='checkbox'" +
+                                "id=" + i.toString() + "-" + j.toString() +
+                                ">";
+          table_tr.appendChild(table_td);
+        }
+        table.appendChild(table_tr);
+      }
+      return table;
+    }
+
+    var width = 50;
+    var height = 20;
+    var gridNum = width * height;
+
+    // generate the grid
+    var grid = document.getElementById("grid");
+    grid.appendChild(generateGrid(width, height));
+
+    function randomLifes (gridNum) {
+      var lifes = [];
+      for (var i = 0; i < gridNum; i++) {
+        lifes[i] = Math.round(Math.random());
+      }
+      return lifes;
+    }
+
+    function getLifeId (lifenum, width) {
+      var row_number = Math.floor(lifenum / width);
+      var col_number = lifenum % width;
+      return row_number.toString() + "-" + col_number.toString();
+    }
+    // generate random lifes
+    function updateGridLife (lifes) {
+      lifes.forEach(function(life, index) {
+        var life_id = getLifeId(index, width);
+        var life_element = document.getElementById(life_id);
+        life_element.checked = life;
+      });
+    }
+
+    var lifes = randomLifes(gridNum);
+    updateGridLife (lifes);
+
+    function getNeighborsId (lifenum, width, height) {
+      var nb = [];
+      var row = Math.floor(lifenum / width);
+      var col = lifenum % width;
+      // (row - 1) >= 0表示上一行有邻居
+      if ((row - 1) >= 0) {
+        if ((col - 1) >= 0) {
+          nb.push((row - 1).toString() + "-" + (col - 1).toString());
+          nb.push(row.toString() + "-" + (col - 1).toString());
+        }
+        nb.push((row - 1).toString() + "-" + col.toString());
+        if ((col + 1) < width) {
+          nb.push((row - 1).toString() + "-" + (col + 1).toString());
+          nb.push(row.toString() + "-" + (col + 1).toString());
+        }
+      } else if (row == 0) {
+        if ((col - 1) >= 0) {
+          nb.push(row.toString() + "-" + (col - 1).toString());
+        }
+        if ((col + 1) < width) {
+          nb.push(row.toString() + "-" + (col + 1).toString());
+        }
+      }
+
+      // (row + 1) < height表示下一行有邻居
+      if ((row + 1) < height) {
+        if ((col - 1) >= 0) {
+          nb.push((row + 1).toString() + "-" + (col - 1).toString());
+        }
+        nb.push((row + 1).toString() + "-" + col.toString());
+        if ((col + 1) < width) {
+          nb.push((row + 1).toString() + "-" + (col + 1).toString());
+        }
+      }
+      return nb;
+    }
+
+    function nextGeneration () {
+      var new_lifes = lifes;
+      lifes.forEach(function (life, index) {
+        var neighborsNum = 0;
+        var neighborsId = getNeighborsId(index, width, height);
+        neighborsId.forEach(function (nb) {
+          var nb_element = document.getElementById(nb);
+          if (nb_element.checked)
+            neighborsNum += 1;
+        });
+
+        var life_element = document.getElementById(getLifeId(index, width));
+        if (life_element.checked) {
+          if ((neighborsNum < 2) || (neighborsNum > 3))
+            new_lifes[index] = false;
+          else if ((neighborsNum == 2) || (neighborsNum == 3))
+            new_lifes[index] = true;
+        } else {
+          if (neighborsNum == 3)
+            new_lifes[index] = true;
+        }
+      });
+
+      updateGridLife (new_lifes);
+      lifes = new_lifes;
+    }
+
+    var turn = document.getElementById("next");
+    turn.addEventListener("click", nextGeneration);
+
+    var autorun = document.getElementById("auto");
+    var running = null;
+    autorun.addEventListener("click", function () {
+      if (running) {
+        clearInterval(running);
+        running = null;
+      } else {
+        running = setInterval(nextGeneration, 1000);
+      }
+    });
+
+    // test code
+    // getNeighborsId(0, 50, 20).forEach(function (life) {
+    //   var nb = document.getElementById(life);
+    //   nb.checked = true;
+    // });
+    // getNeighborsId(49, 50, 20).forEach(function (life) {
+    //   var nb = document.getElementById(life);
+    //   nb.checked = true;
+    // });
+    // getNeighborsId(950, 50, 20).forEach(function (life) {
+    //   var nb = document.getElementById(life);
+    //   nb.checked = true;
+    // });
+    // getNeighborsId(999, 50, 20).forEach(function (life) {
+    //   var nb = document.getElementById(life);
+    //   nb.checked = true;
+    // });
+    // getNeighborsId(588, 50, 20).forEach(function (life) {
+    //   var nb = document.getElementById(life);
+    //   nb.checked = true;
+    // });
+    // getNeighborsId(300, 50, 20).forEach(function (life) {
+    //   var nb = document.getElementById(life);
+    //   nb.checked = true;
+    // });
+    // getNeighborsId(449, 50, 20).forEach(function (life) {
+    //   var nb = document.getElementById(life);
+    //   nb.checked = true;
+    // });
+  </script>
+</body>
+</html>
+
+
+<!-- the author's solution:
+<!doctype html>
+<script src="code/promise.js"></script>
+
+<div id="grid"></div>
+<button id="next">Next generation</button>
+<button id="run">Auto run</button>
+
+<script>
+  var width = 30, height = 15;
+
+  // I will represent the grid as an array of booleans.
+
+  var gridNode = document.querySelector("#grid");
+  // This holds the checkboxes that display the grid in the document.
+  var checkboxes = [];
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      var box = document.createElement("input");
+      box.type = "checkbox";
+      gridNode.appendChild(box);
+      checkboxes.push(box);
+    }
+    gridNode.appendChild(document.createElement("br"));
+  }
+
+  function gridFromCheckboxes() {
+    return checkboxes.map(function(box) { return box.checked; });
+  }
+  function checkboxesFromGrid(grid) {
+    return grid.forEach(function(value, i) { checkboxes[i].checked = value; });
+  }
+  function randomGrid() {
+    var result = [];
+    for (var i = 0; i < width * height; i++)
+      result.push(Math.random() < 0.3);
+    return result;
+  }
+
+  checkboxesFromGrid(randomGrid());
+
+  // This does a two-dimensional loop over the square around the given
+  // x,y position, counting all fields that have a cell but are not the
+  // center field.
+  function countNeighbors(grid, x, y) {
+    var count = 0;
+    for (var y1 = Math.max(0, y - 1); y1 <= Math.min(height - 1, y + 1); y1++) {
+      for (var x1 = Math.max(0, x - 1); x1 <= Math.min(width - 1, x + 1); x1++) {
+        if ((x1 != x || y1 != y) && grid[x1 + y1 * width])
+          count += 1;
+      }
+    }
+    return count;
+  }
+
+  function nextGeneration(grid) {
+    var newGrid = new Array(width * height);
+    for (var y = 0; y < height; y++) {
+      for (var x = 0; x < width; x++) {
+        var neighbors = countNeighbors(grid, x, y);
+        var offset = x + y * width;
+        if (neighbors < 2 || neighbors > 3)
+          newGrid[offset] = false;
+        else if (neighbors == 2)
+          newGrid[offset] = grid[offset];
+        else
+          newGrid[offset] = true;
+      }
+    }
+    return newGrid;
+  }
+
+  function turn() {
+    checkboxesFromGrid(nextGeneration(gridFromCheckboxes()));
+  }
+
+  document.querySelector("#next").addEventListener("click", turn);
+
+  var running = null;
+  document.querySelector("#run").addEventListener("click", function() {
+    if (running) {
+      clearInterval(running);
+      running = null;
+    } else {
+      running = setInterval(turn, 400);
+    }
+  });
+</script> -->
