@@ -1,2 +1,4 @@
 .idea/
+node_modules/
 nodejs/node_modules/
+skill-sharing-website/node_modules/
