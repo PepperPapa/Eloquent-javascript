@@ -1,3 +1,4 @@
+var fs = require('fs');
 var http = require("http");
 var Router = require("./router");
 var ecstatic = require("ecstatic");
@@ -22,7 +23,32 @@ function respondJSON(response, status, data) {
           "application/json");
 }
 
-var talks = Object.create(null);
+// 从硬盘读取talks信息，如果talks不存在则创建空的talks对象
+var talks = loadTalks();
+
+function loadTalks() {
+  var result = Object.create(null);
+  var json;
+  try {
+    result = JSON.parse(fs.readFileSync('./talks.json', 'utf-8'));
+  } catch (e) {
+    result = {};
+  }
+  return result;
+}
+
+// the author's solution for loadTalks function
+// function loadTalks() {
+//   var result = Object.create(null), json;
+//   try {
+//     json = JSON.parse(fs.readFileSync("./talks.json", "utf8"));
+//   } catch (e) {
+//     json = {};
+//   }
+//   for (var title in json)
+//     result[title] = json[title];
+//   return result;
+// }
 
 router.add("GET", /^\/talks\/([^\/]+)$/,
            function(request, response, title) {
@@ -105,6 +131,7 @@ function sendTalks(talks, response) {
 
 router.add("GET", /^\/talks$/, function(request, response) {
   var query = require("url").parse(request.url, true).query;
+  // TODO: 弄清楚以下语句使用===为什么会出错
   if (query.changesSince == null) {
     var list = [];
     for (var title in talks)
@@ -146,6 +173,14 @@ function registerChange(title) {
     sendTalks(getChangedTalks(waiter.since), waiter.response);
   });
   waiting = [];
+
+  // 当talks发生改变时及保存talks数据到硬盘
+  fs.writeFile('./talks.json', JSON.stringify(talks), (err) => {
+    if (err) {
+      throw err;
+    }
+    console.log("talks were saved!");
+  });
 }
 
 function getChangedTalks(since) {

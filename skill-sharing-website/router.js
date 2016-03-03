@@ -1,3 +1,4 @@
+// Router为一构造函数
 var Router = module.exports = function() {
   this.routes = [];
 };

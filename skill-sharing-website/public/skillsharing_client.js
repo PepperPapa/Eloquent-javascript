@@ -35,7 +35,15 @@ function displayTalks(talks) {
     } else {
       var node = drawTalk(talk);
       if (shown) {
+        var textField = shown.querySelector("input");
+        var hasFocus = (document.activeElement == textField);
+        var value = textField.value;
         talkDiv.replaceChild(node, shown);
+        var newTextField = node.querySelector("input");
+        newTextField.value = value;
+        if (hasFocus) {
+          newTextField.focus();
+        }
       } else {
         talkDiv.appendChild(node);
       }
@@ -50,17 +58,34 @@ function instantiateTemplate(name, values) {
       return values[name];
     });
   }
-  function instantiate(node) {
+  function attr(node, attrName) {
+    return node.nodeType == document.ELEMENT_NODE &&
+      node.getAttribute(attrName);
+  }
+  function instantiate(node, values) {
     if (node.nodeType == document.ELEMENT_NODE) {
       var copy = node.cloneNode();
       for (var i = 0; i < node.childNodes.length; i++) {
-        copy.appendChild(instantiate(node.childNodes[i]));
+        var child = node.childNodes[i];
+
+        var when = attr(child, "template-when");
+        var unless = attr(child, "template-unless");
+        if (when && !values[when] || unless && values[unless]) {
+          continue;
+        }
+
+        var repeat = attr(child, "template-repeat");
+        if (repeat) {
+          (values[repeat] || []).forEach(function(element) {
+            copy.appendChild(instantiate(child, element));
+          });
+        } else {
+          copy.appendChild(instantiate(child, values));
+        }
       }
       return copy;
     } else if (node.nodeType == document.TEXT_NODE) {
-      return document.createTextNode(instantiateText(node.nodeValue));
-    } else {
-      return node;
+      return document.createTextNode(instantiateText(node.nodeValue, values));
     }
   }
   var template = document.querySelector("#template ." + name);
@@ -80,7 +105,6 @@ function drawTalk(talk) {
   var form = node.querySelector("form");
   form.addEventListener("submit", function(event) {
     event.preventDefault();
-    console.log("add comment is doing");
     addComment(talk.title, form.elements.comment.value);
     form.reset();
   });
@@ -112,7 +136,6 @@ function deleteTalk(title) {
 
 function addComment(title, comment) {
   var comment = {author: nameField.value, message: comment};
-  console.log(talkURL(title) + "/comments");
   request({pathname: talkURL(title) + "/comments",
            body: JSON.stringify(comment),
            method: "POST"},
