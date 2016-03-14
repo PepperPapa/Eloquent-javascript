@@ -87,6 +87,106 @@ tools.Erase = function(event, cx) {
   });
 };
 
+function rectangleFrom(a, b) {
+  return {left: Math.min(a.x, b.x),
+          top: Math.min(a.y, b.y),
+          width: Math.abs(a.x - b.x),
+          height: Math.abs(a.y - b.y)};
+}
+
+tools.Rectangle = function(event, cx) {
+  var relativeStart = relativePos(event, cx.canvas);
+  var pageStart = {x: event.pageX, y: event.pageY};
+
+  var trackingNode = document.createElement("div");
+  trackingNode.style.position = "absolute";
+  trackingNode.style.background = cx.fillStyle;
+  document.body.appendChild(trackingNode);
+
+  trackDrag(function(event) {
+    var rect = rectangleFrom(pageStart,
+                             {x: event.pageX, y: event.pageY});
+    trackingNode.style.left = rect.left + "px";
+    trackingNode.style.top = rect.top + "px";
+    trackingNode.style.width = rect.width + "px";
+    trackingNode.style.height = rect.height + "px";
+  }, function(event) {
+    var rect = rectangleFrom(relativeStart,
+                             relativePos(event, cx.canvas));
+    cx.fillRect(rect.left, rect.top, rect.width, rect.height);
+    document.body.removeChild(trackingNode);
+  });
+};
+
+function colorAt(cx, x, y) {
+  var pixel = cx.getImageData(x, y, 1, 1).data;
+  return "rgb(" + pixel[0] + ", " + pixel[1] + ", " + pixel[2] + ")";
+}
+
+tools["Pick color"] = function(event, cx) {
+  var pos = relativePos(event, cx.canvas);
+  try {
+    var color = colorAt(cx, pos.x, pos.y);
+  } catch(e) {
+    if (e instanceof SecurityError) {
+      alert("Unable to access your picture's pixel data");
+      return;
+    } else {
+      throw e;
+    }
+  }
+  cx.fillStyle = color;
+  cx.strokeStyle = color;
+};
+
+// Call a given function for all horizontal and vertical neighbors
+// of the given point.
+function forAllNeighbors(point, fn) {
+  fn({x: point.x, y: point.y + 1});
+  fn({x: point.x, y: point.y - 1});
+  fn({x: point.x + 1, y: point.y});
+  fn({x: point.x - 1, y: point.y});
+}
+
+// Given two positions, returns true when they hold the same color.
+function isSameColor(data, pos1, pos2) {
+  var offset1 = (pos1.x + pos1.y * data.width) * 4;
+  var offset2 = (pos2.x + pos2.y * data.width) * 4;
+  for (var i = 0; i < 4; i++) {
+    if (data.data[offset1 + i] != data.data[offset2 + i])
+      return false;
+  }
+  return true;
+}
+
+tools["Flood fill"] = function(event, cx) {
+  var startPos = relativePos(event, cx.canvas);
+
+  var data = cx.getImageData(0, 0, cx.canvas.width,
+                             cx.canvas.height);
+  // An array with one place for each pixel in the image.
+  var alreadyFilled = new Array(data.width * data.height);
+
+  // This is a list of same-colored pixel coordinates that we have
+  // not handled yet.
+  var workList = [startPos];
+  while (workList.length) {
+    var pos = workList.pop();
+    var offset = pos.x + data.width * pos.y;
+    if (alreadyFilled[offset]) continue;
+
+    cx.fillRect(pos.x, pos.y, 1, 1);
+    alreadyFilled[offset] = true;
+
+    forAllNeighbors(pos, function(neighbor) {
+      if (neighbor.x >= 0 && neighbor.x < data.width &&
+          neighbor.y >= 0 && neighbor.y < data.height &&
+          isSameColor(data, startPos, neighbor))
+        workList.push(neighbor);
+    });
+  }
+};
+
 controls.color = function(cx) {
   var input = elt("input", {type: "color"});
   input.addEventListener("change", function() {
