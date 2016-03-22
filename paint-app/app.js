@@ -40,6 +40,7 @@ controls.tool = function(cx) {
   }
 
   cx.canvas.addEventListener("mousedown", function(event) {
+    // left button
     if (event.which == 1) {
       tools[select.value](event, cx);
       event.preventDefault();
